@@ -2,14 +2,63 @@
   "name": "electerm-x11",
   "version": "0.1.0",
   "description": "On-demand X11 display for Electerm, with a browser viewer and a standalone loopback server",
+  "keywords": [
+    "electerm",
+    "x11",
+    "x-server",
+    "ssh",
+    "x11-forwarding",
+    "websocket"
+  ],
+  "homepage": "https://github.com/electerm/electerm-x11#readme",
+  "bugs": {
+    "url": "https://github.com/electerm/electerm-x11/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/electerm/electerm-x11.git"
+  },
   "license": "MIT",
-  "repository": {"type":"git","url":"git+https://github.com/electerm/electerm-x11.git"},
-  "engines": {"node": ">=16.0.0"},
+  "author": "electerm",
   "main": "./src/display.cjs",
-  "exports": {".":"./src/display.cjs","./viewer.html":"./dist/viewer.html","./connect.mjs":"./src/connect.mjs"},
-  "bin": {"electerm-x11":"./bin/electerm-x11.cjs"},
-  "files": ["src/display.cjs","src/connect.mjs","bin","dist/viewer.html","LICENSE","README.md","README.cn.md"],
-  "scripts": {"build":"node build/viewer.cjs","test":"node --test test/*.test.cjs","prepack":"npm run build"},
-  "dependencies":{"ws":"^8.23.0"},
-  "devDependencies":{"buffer":"6.0.3","events":"3.3.0","esbuild":"0.28.2","x11":"4.4.0"}
+  "exports": {
+    ".": "./src/display.cjs",
+    "./viewer.html": "./dist/viewer.html",
+    "./connect.mjs": "./src/connect.mjs"
+  },
+  "bin": {
+    "electerm-x11": "./bin/electerm-x11.cjs"
+  },
+  "files": [
+    "src/display.cjs",
+    "src/connect.mjs",
+    "bin",
+    "dist/viewer.html",
+    "LICENSE",
+    "README.md",
+    "README.cn.md"
+  ],
+  "scripts": {
+    "build": "node build/viewer.cjs",
+    "prestart": "npm run build",
+    "start": "node bin/electerm-x11.cjs",
+    "test": "node --test test/*.test.cjs",
+    "pack:check": "npm pack --dry-run",
+    "prepack": "npm run build"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "ws": "^8.23.0"
+  },
+  "devDependencies": {
+    "buffer": "6.0.3",
+    "esbuild": "0.28.2",
+    "events": "3.3.0",
+    "x11": "4.4.0"
+  }
 }
