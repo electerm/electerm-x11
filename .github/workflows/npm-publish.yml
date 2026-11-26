@@ -1,0 +1,86 @@
+name: Publish to npm
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm pack --pack-destination "$RUNNER_TEMP"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16.0.0'
+      - name: Smoke-test the packed runtime at its Node floor
+        run: |
+          mkdir "$RUNNER_TEMP/x11-consumer"
+          cd "$RUNNER_TEMP/x11-consumer"
+          npm install --no-save --ignore-scripts "$RUNNER_TEMP"/electerm-x11-*.tgz
+          node "$GITHUB_WORKSPACE/test/packed-smoke.cjs" "$PWD"
+      - name: Check npm for a new version after the manual first release
+        id: version
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && !contains(github.event.head_commit.message, '[skip npm]')
+        shell: bash
+        run: |
+          node <<'NODE'
+          const https = require('https')
+          const fs = require('fs')
+          const { name, version } = require('./package.json')
+          https.get('https://registry.npmjs.org/' + encodeURIComponent(name), res => {
+            if (res.statusCode === 404 || version === '0.1.0') {
+              console.log('The first npm release is manual.')
+              res.resume()
+              return
+            }
+            if (res.statusCode !== 200) throw Error('npm returned HTTP ' + res.statusCode)
+            let body = ''
+            res.setEncoding('utf8').on('data', chunk => { body += chunk })
+            res.on('end', () => {
+              const { versions } = JSON.parse(body)
+              const publish = !Object.prototype.hasOwnProperty.call(versions, version) && Object.keys(versions).length > 0
+              fs.appendFileSync(process.env.GITHUB_OUTPUT, 'publish=' + publish + '\n')
+            })
+          }).on('error', err => { throw err })
+          NODE
+
+  publish:
+    needs: check
+    if: needs.check.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: npm-publish
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org/
+          cache: npm
+      - run: npm ci
+      - name: Publish with npm trusted publishing
+        run: |
+          if npm view "electerm-x11@$(node -p "require('./package.json').version")" version >/dev/null 2>&1; then
+            echo 'Version already published.'
+          else
+            npm publish --access public --provenance
+          fi
