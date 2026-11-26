@@ -1,5 +1,7 @@
 # electerm-x11
 
+**English** | [简体中文](./README.cn.md)
+
 A JavaScript X11 display with a browser viewer. Run it as a standalone companion, or embed the same viewer in an SSH client. The Node runtime supports 16.0.0 and later. The X11 engine ships inside a self-contained HTML asset and runs in the viewer.
 
 ## Standalone display

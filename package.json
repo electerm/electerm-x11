@@ -8,7 +8,7 @@
   "main": "./src/display.cjs",
   "exports": {".":"./src/display.cjs","./viewer.html":"./dist/viewer.html","./connect.mjs":"./src/connect.mjs"},
   "bin": {"electerm-x11":"./bin/electerm-x11.cjs"},
-  "files": ["src/display.cjs","src/connect.mjs","bin","dist/viewer.html","LICENSE","README.md"],
+  "files": ["src/display.cjs","src/connect.mjs","bin","dist/viewer.html","LICENSE","README.md","README.cn.md"],
   "scripts": {"build":"node build/viewer.cjs","test":"node --test test/*.test.cjs","prepack":"npm run build"},
   "dependencies":{"ws":"^8.23.0"},
   "devDependencies":{"buffer":"6.0.3","events":"3.3.0","esbuild":"0.28.2","x11":"4.4.0"}
